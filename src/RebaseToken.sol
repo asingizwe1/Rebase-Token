@@ -20,6 +20,8 @@ contract RebaseToken is ERC20
     uint256 private s_interestRate=5e10;//you can work with decimals in solidity 
     //50/100 *1e18 = 5e10
 mapping (address=>uint256) public s_userInterestRate;
+mapping (address=>uint256) public s_lastUpdatedTimestamp;
+//you need to calculate time so that you know the amnount of interest that has accrued
 
 
      ////////////////
@@ -44,8 +46,9 @@ if (_newInterestRate<s_interestRate){
 }
 
 /**
- * @notice get interest rate for user
- * 
+ * @notice mint the user tokens
+ * @param _to the user to mint the tokens to
+ * @param _amount the amount of tokens to mint
  * 
  */
 function mint(address _to, uint256 _amount) external{
@@ -61,9 +64,47 @@ function _mintAccruedInterest(address _user) internal (uint256){
 //1find current balance
 // 2 and also current balance including interest
 //calculate the number of RebaseToken that need to be minted to the user 2-1->interest
+//calll _mint to mint user tokens
+//set user's last timestamp
+s_userLastUpdatedTimestamp[]=block.timetsamp;
+
+
 
 }
 
+/**
+ * @notice balance user
+ * @param _to the user to mint the tokens to
+ * @return balance of the user including the interest that has accumulated 
+ * 
+ */
+
+
+function balanceOf(address _user)public view override returns (uint256){
+
+//get current principal balance
+//mulitply multiple balance with the interest that has accrumulated in the time since last update
+return super.balanceOf(_user) * _calculateAccruedInterestSinceLastUpdate(_user);
+//super.- means find fucntion in contract we are inheriting
+
+}
+
+
+/**
+ * @notice calculate the interest that has accumulated since the last update
+ * @param _user The user to calculate the interest accumulated for
+ * @return the interest that has accumulated since the last update
+ * 
+ */
+function _calculateUserAccumulatedInterestSinceLastUpdate(address _user) external view returns (uint256){
+//calculate interest that has accumulated since last update
+//this is going to be linear growth with time
+//1. calculate time since last update
+//2 calculate linear growth
+//(principal amount)+(principal amount * user interest rate * time elapsed)
+uint256 timeElapsed = block.timestamp - s_userLastUpdatedTimestamp[_user];
+linearInterest=PRECISION+(s_userInterestRate[_user]*timeElapsed);//we have to set it to exact accuracy so instead of 1 we are using 1e18 for precision
+}
 
 function getUserInterestRate(address _user) external view returns (uint256){
 return s_userInterstRate[_user];
