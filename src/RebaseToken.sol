@@ -50,11 +50,22 @@ if (_newInterestRate<s_interestRate){
  */
 function mint(address _to, uint256 _amount) external{
     // at point of minting we want to set our own interest rate
+s_userInterestRate[_to]=s_interestRate;
 _mint(_to,_amount);//from openzeppelin
+//if someone has minted before, interest is done before acrued interest
+_mintAccruedInterest(_to);//mint any interest that has accrued simnce last
 
 }
 
-function getUserInterestRate(address _user) exterbal view returns (uint256){
+function _mintAccruedInterest(address _user) internal (uint256){
+//1find current balance
+// 2 and also current balance including interest
+//calculate the number of RebaseToken that need to be minted to the user 2-1->interest
+
+}
+
+
+function getUserInterestRate(address _user) external view returns (uint256){
 return s_userInterstRate[_user];
 
 }
