@@ -17,6 +17,7 @@ contract RebaseToken is ERC20
 
      ////////////////
     //STATE VARIABLES
+    uint256 private constant PRECISION_FACTOR=1e18;
     uint256 private s_interestRate=5e10;//you can work with decimals in solidity 
     //50/100 *1e18 = 5e10
 mapping (address=>uint256) public s_userInterestRate;
@@ -84,7 +85,8 @@ function balanceOf(address _user)public view override returns (uint256){
 
 //get current principal balance
 //mulitply multiple balance with the interest that has accrumulated in the time since last update
-return super.balanceOf(_user) * _calculateAccruedInterestSinceLastUpdate(_user);
+return super.balanceOf(_user) * _calculateAccruedInterestSinceLastUpdate(_user)/PRECISION_FACTOR;
+//to preseve precision you divide after as much multiplying as possible
 //super.- means find fucntion in contract we are inheriting
 
 }
@@ -101,9 +103,11 @@ function _calculateUserAccumulatedInterestSinceLastUpdate(address _user) externa
 //this is going to be linear growth with time
 //1. calculate time since last update
 //2 calculate linear growth
+//(principal amount)(1+user interest rate * time elapsed)
 //(principal amount)+(principal amount * user interest rate * time elapsed)
 uint256 timeElapsed = block.timestamp - s_userLastUpdatedTimestamp[_user];
-linearInterest=PRECISION+(s_userInterestRate[_user]*timeElapsed);//we have to set it to exact accuracy so instead of 1 we are using 1e18 for precision
+linearInterest=PRECISION_FACTOR+(s_userInterestRate[_user]*timeElapsed);//we have to set it to exact accuracy so instead of 1 we are using 1e18 for precision
+//if you have 1e18 that is basically 1 token
 }
 
 function getUserInterestRate(address _user) external view returns (uint256){
