@@ -58,16 +58,48 @@ s_userInterestRate[_to]=s_interestRate;
 _mint(_to,_amount);//from openzeppelin
 //if someone has minted before, interest is done before acrued interest
 _mintAccruedInterest(_to);//mint any interest that has accrued simnce last
+_mint(_to,_address);
+}
+
+/**
+ * @notice burn the user tokens when they withdraw from the vault
+ * @param _from the user to burn the tokens from
+ * @param _amount the amount of tokens to burn
+ */
+function burn(address _from,uint256 _amount)external//called when we transfer tokens cross chain
+{
+    if (_amount==type(uint256).max){
+_amount = balanceOf(_from);
+}
+    //redeem all tokens
+
+_mintAccruedInterest(_from);
+_burn(_from,_amount);
 
 }
 
+
+
+
+/**
+ * @notice Mint interest of user since the last time they interacted with the protocol
+ * @param _user The user to mint the accrued interest
+
+ * 
+ */
 function _mintAccruedInterest(address _user) internal (uint256){
 //1find current balance
+uint256 previousPricipleBalance=super.balanceof(_user);//implementaion of the ERC20 contract method using super
 // 2 and also current balance including interest
+uint256 currentBalance =balanceOf(_user);
 //calculate the number of RebaseToken that need to be minted to the user 2-1->interest
+uint256 balanceIncrease=currentBalance-previousPricipleBalance;
 //calll _mint to mint user tokens
 //set user's last timestamp
+//Effects
 s_userLastUpdatedTimestamp[]=block.timetsamp;
+//interactions
+_mint(_user,balanceIncrease);
 
 
 
