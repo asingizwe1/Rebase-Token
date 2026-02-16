@@ -29,6 +29,8 @@ mapping (address=>uint256) public s_lastUpdatedTimestamp;
     //EVENTS
     event InterestRateSet(uint256 newInterestRate);
 
+//transfer function of ERC20.sol ->we have to override the transfer function because people can send small amounts to drive the interest down for people
+
 constructor() ERC20("RebaseToken","RCT"){}
 
 /**
@@ -123,6 +125,24 @@ return super.balanceOf(_user) * _calculateAccruedInterestSinceLastUpdate(_user)/
 
 }
 
+/**
+ * 
+ * 
+ */
+function transfer(address _recepient,uint256 value) public virtual returns (bool){
+// address owner = _msg.Sender();
+// _transfer(owner,to,value);
+// return true;
+//before we send tokens we have to check if interest nas accrued
+//if they have any pending interest it will be minted to them
+_mintAccruedInterest(msg.sender);
+_mintAccruedInterest(_recepient);
+
+
+if(_amount==type(uint256).max){
+_amount=balanceOf(msg.sender);
+}
+}
 
 /**
  * @notice calculate the interest that has accumulated since the last update
