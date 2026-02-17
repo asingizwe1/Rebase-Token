@@ -1,6 +1,9 @@
 //SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import {Ownable} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import {AccessControl} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+
 
 /**
  * @title RebaseToken
@@ -9,7 +12,9 @@ import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
  * @notice Interest rate can only deposit
  * @notice each user will have global interest rate at the point of deposit
  */
-contract RebaseToken is ERC20
+
+// to add access control we have to make this contract ownable
+contract RebaseToken is ERC20,Ownable,AccessControl
 {
     ////////////////
     //Errors
@@ -18,6 +23,8 @@ contract RebaseToken is ERC20
      ////////////////
     //STATE VARIABLES
     uint256 private constant PRECISION_FACTOR=1e18;
+    byes32 private constant MINT_AND_BURN_ROLE=keccak256("MINT_AND_BURN_ROLE");
+    //THIS IS HOW YOU CREATE A SPECIFIC ROLE
     uint256 private s_interestRate=5e10;//you can work with decimals in solidity 
     //50/100 *1e18 = 5e10
 mapping (address=>uint256) public s_userInterestRate;
@@ -31,7 +38,13 @@ mapping (address=>uint256) public s_lastUpdatedTimestamp;
 
 //transfer function of ERC20.sol ->we have to override the transfer function because people can send small amounts to drive the interest down for people
 
-constructor() ERC20("RebaseToken","RCT"){}
+constructor() ERC20("RebaseToken","RCT") Ownable(msg.sender)// we pass in whoever wants to be the owner
+{}
+
+function grantMintAndBurnRole(address _account) external onlyOwner{
+_grantRole(MINT_AND_BURN_ROLE,_account);
+
+}
 
 /**
  * @notice Set the interest rate in the contract
@@ -39,12 +52,19 @@ constructor() ERC20("RebaseToken","RCT"){}
  * @dev The interest rate can only decrease
  * 
  */
-function setInterestRate(uint256 _newInterestRate) external{
+//we add only owner because set interest is only callable by owner,
+ //thats why we import Owner from Openzeppelin
+function setInterestRate(uint256 _newInterestRate) external onlyOwner{
 if (_newInterestRate<s_interestRate){
     revert RebaseToken__InterestRateCanOnlyDecrease();
 }
      s_interestRate = _newInterestRate;
     emit InterestRateSet(_newInterestRate);
+
+// in openzeppelin we have AccessControl.sol
+//this helps you give certain addresses certain roles ie you can call this if you have a certain role
+//you can grant role or revoke role
+//we create role for minting nad burning
 
 }
 
@@ -126,7 +146,9 @@ return super.balanceOf(_user) * _calculateAccruedInterestSinceLastUpdate(_user)/
 }
 
 /**
- * 
+ * @notice Transfer tokens from one user to another
+ * @param _recepient user tokens to
+ * @param value _amount of tokens to transfer
  * 
  */
 function transfer(address _recepient,uint256 value) public virtual returns (bool){
@@ -141,7 +163,58 @@ _mintAccruedInterest(_recepient);
 
 if(_amount==type(uint256).max){
 _amount=balanceOf(msg.sender);
+}//check if recepient has interest rate, if not we set it
+if (balanceOf(_recepient)==0){
+s_userInterestRate[_recepient]=s_userInterestRate[msg.sender];
 }
+return super.transfer(_recepient,_amount);
+//this will call the transfer function
+
+}
+
+/**
+ * @notice Transfer tokens from one user to another
+ * @param _recepient user tokens to
+ * @param value _amount of tokens to transfer
+ * 
+ */
+function transferFrom(address _sender, address _recepient, uint256 _amount) public override returns()
+{
+_mintAccruedInterest(_sender);
+_mintAccruedInterest(_recepient);
+
+
+if(_amount==type(uint256).max){
+_amount=balanceOf(msg.sender);
+}//check if recepient has interest rate, if not we set it
+if (balanceOf(_recepient)==0){
+s_userInterestRate[_recepient]=s_userInterestRate[_sender];//sent interest of sender
+
+}
+return super.transfer(_recepient,_amount);
+
+
+}
+
+/**
+ * @notice Get principle balance of a user, this is the number of tokens that have been minted to user, excluding interest minted since last time of using the protocol
+ * @param _user user to get baoance of
+ * @return Principle balance of user
+ * 
+ */
+function principleBalanceOf(address _user) external view returns (uint256)
+{
+return super.balanceOf[_user];
+}
+
+/**
+ * @notice Get interest rate that is currently set for the contract. Any future deposit will receive this interest
+ * @return Principle balance of user
+ * 
+ */
+function getIntrestRate() external virw returns(uint256){
+return s_interestRate;
+
 }
 
 /**
