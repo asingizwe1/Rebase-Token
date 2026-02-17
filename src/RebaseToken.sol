@@ -74,7 +74,8 @@ if (_newInterestRate<s_interestRate){
  * @param _amount the amount of tokens to mint
  * 
  */
-function mint(address _to, uint256 _amount) external{
+function mint(address _to, uint256 _amount) external onlyRole(MINT_AND_BURN_ROLE)
+{
     // at point of minting we want to set our own interest rate
 s_userInterestRate[_to]=s_interestRate;
 _mint(_to,_amount);//from openzeppelin
@@ -89,6 +90,7 @@ _mint(_to,_address);
  * @param _amount the amount of tokens to burn
  */
 function burn(address _from,uint256 _amount)external//called when we transfer tokens cross chain
+onlyRole(MINT_AND_BURN_ROLE)
 {
     if (_amount==type(uint256).max){
 _amount = balanceOf(_from);
