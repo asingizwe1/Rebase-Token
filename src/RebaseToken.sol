@@ -23,6 +23,7 @@ contract RebaseToken is ERC20,Ownable,AccessControl
      ////////////////
     //STATE VARIABLES
     uint256 private constant PRECISION_FACTOR=1e18;
+    //grant a role by hashing a string which represents  a role
     byes32 private constant MINT_AND_BURN_ROLE=keccak256("MINT_AND_BURN_ROLE");
     //THIS IS HOW YOU CREATE A SPECIFIC ROLE
     uint256 private s_interestRate=5e10;//you can work with decimals in solidity 
