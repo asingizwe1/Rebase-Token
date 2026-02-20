@@ -1,6 +1,6 @@
 // this is where users will lock and handle their eth
 //SPDX-License-Identifier: MIT
-// SPDX-License-Identifier: SEE LICENSE IN LICENSE
+
 pragma solidity 0.8.24;
 
 import {IRebaseToken} from "./interfaces/IRebaseToken.sol";
