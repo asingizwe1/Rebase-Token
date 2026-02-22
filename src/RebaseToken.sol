@@ -22,7 +22,8 @@ contract RebaseToken is ERC20,Ownable,AccessControl
 
      ////////////////
     //STATE VARIABLES
-    uint256 private constant PRECISION_FACTOR=1e27;
+    uint256 private constant PRECISION_FACTOR=1e18;
+    //we can reduce precision factor to prevent overflow but we want to be able to have very small interest rates
     //grant a role by hashing a string which represents  a role
     byes32 private constant MINT_AND_BURN_ROLE=keccak256("MINT_AND_BURN_ROLE");
     //THIS IS HOW YOU CREATE A SPECIFIC ROLE
