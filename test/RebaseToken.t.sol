@@ -28,7 +28,10 @@ rebaseToken.grantMintAndBurnRole(address(vault));
    vm.stopPrank();
 }
 
-funct
+function addRewardsToVault(uint256 rewardAmount) public
+{
+(bool success,)=payable(address(vault)).call{value:rewardAmount}("");
+}
 
 function testDepositLinear() public
 {
@@ -64,23 +67,41 @@ vm.stopPrank();
 }
 
 function testRedeemAfterTimePassed(uint256 depositAmount, uint256 time) public{
-time=bound(time,100,type(uint256).max);
-depositAmount=bound(depositAmount,1e5,type(uint256).max)
+time=bound(time,100,type(uint96).max);//its more practical to use 96 instead of 256
+depositAmount=bound(depositAmount,1e5,type(uint96).max)
 //1 deposit
-vm.startPrank(user);
-vm.deal(user,amount);
+
+vm.deal(user,amount);//this doesnt count as a tx
+vm.prank(user);
 vault.deposit{value:amount}("");
 //2 warp the time
 vm.warp(block.timestamp+time);
 uint256 balance=rebaseToken.balanceOf(user);
+//2 b - add rewards to the vault
+vm.deal(owner,balanceAfrerSomeTime-depositAmount)
+vm.prank(owner);
+addRewardsToVault(balanceAfterSomeTime-depositAmount);
+
 //3 redeem
+vm.prank(user);
 vault.redeem(type(uint256).max)
-vm.stopPrank();
+
 
 uint256 ethBalance=address(user).balance;
 assertEq(ethBalance,balance);//amount in eth is equal to the amount in rebase tokens
 assertGt(ethBalance,depositAmount);//check if there balance has increased
 
 }
+
+/**
+ * vm.deal and vm.warp
+ * special testing utilities that let you manipulate blockchain state directly
+ * for simulating scenarios without waiting for real-world conditions.
+ * vm.deal - Sets the balance of a given address to a specified value.
+ * vm.deal(owner,balanceAfrerSomeTime-depositAmount) -> forces the owner account to have exactly that balance, regardless of prior transactions.
+ * 
+ * vm.warp(timestamp)
+ * Sets the block.timestamp to a specified value.
+ */
 
 }
