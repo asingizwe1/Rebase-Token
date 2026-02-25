@@ -130,5 +130,14 @@ rebaseToken.setInterestRate(4e10);//from 5e10
 
 }
 
+function testCannotSetInterestRate(uint256 newInterestRate) public
+{
+vm.prank(user);
+vm.expectRevert();
+rebaseToken.setInterestRate(newInterestRate);
+
+
+}
+
 
 }
