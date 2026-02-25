@@ -68,6 +68,7 @@ vm.stopPrank();
 
 function testRedeemAfterTimePassed(uint256 depositAmount, uint256 time) public{
 time=bound(time,100,type(uint96).max);//its more practical to use 96 instead of 256
+//we reduce preceision factor to prevent overflow
 depositAmount=bound(depositAmount,1e5,type(uint96).max)
 //1 deposit
 
@@ -103,5 +104,31 @@ assertGt(ethBalance,depositAmount);//check if there balance has increased
  * vm.warp(timestamp)
  * Sets the block.timestamp to a specified value.
  */
+
+function testTransfer(uint256 amount, uint256 amountToSend ) public{
+amount= bound(amount,1e5+1e5,type(uint96).max);
+amountToSend=bound(amountToSend,1e5,amount-1e5)
+//basically amount is always going to be greater that mount sent
+
+//1 deposit
+
+vm.deal(user,amount);//this doesnt count as a tx
+vm.prank(user);
+vault.deposit{value:amount}("");
+//2 transfer
+//they dont get interest rate from contract but instead its inherited
+address user2 = makeAddr("user2");
+uint256 userBalance=rebaseToken.balanceOf(user);
+uint256 user2Balance=rebaseToken.balanceOf(user2);//these 2 just ensure the balances are equal to what we expect
+assertEq(userBalance,amount);
+assertEq(user2Balance,0);
+
+//owner reduces interest rate 
+vm.prank(owner);
+rebaseToken.setInterestRate(4e10);//from 5e10
+
+
+}
+
 
 }

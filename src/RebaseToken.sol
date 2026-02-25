@@ -57,7 +57,7 @@ _grantRole(MINT_AND_BURN_ROLE,_account);
 //we add only owner because set interest is only callable by owner,
  //thats why we import Owner from Openzeppelin
 function setInterestRate(uint256 _newInterestRate) external onlyOwner{
-if (_newInterestRate<s_interestRate){
+if (_newInterestRate>s_interestRate){
     revert RebaseToken__InterestRateCanOnlyDecrease();
 }
      s_interestRate = _newInterestRate;
