@@ -145,13 +145,30 @@ rebaseToken.setInterestRate(newInterestRate);
 function testCannotCallMintAndBurn() public
 {
 vm.prank(user);
+//expectPartialRevert is a cheatcode used in testing smart contracts. Its purpose is to let you assert that a transaction reverts with a specific error selector (the first 4 bytes of the revert data), without requiring you to match the entire revert payload.
 vm.expectPartialRevert(bytes4(AccessControl.AccessControlUnauthorized.selector));
 rebaseToken.mint(user,100);
 vm.expectRevert();
 rebaseToken.burn(user,100);
 
+}
+function testGetPrincipleAmount() public
+{
+amount=bound(amount,1e5,type(uint96).max);
+
+//1 deposit
+
+vm.deal(user,amount);//this doesnt count as a tx
+vm.prank(user);
+vault.deposit{value:amount}("");
+assertEq(rebaseToken.principleBalanceOf(user),amount);
+vm.warp(block.timestamp+1 hours);// to ensure that even after an hour the balance is still the same
 
 }
+function testGetRebaseTokenAddress() public view
+{
+assertEq(address(vault.getRebaseToken()),address(rebaseToken));
 
+}
 
 }
