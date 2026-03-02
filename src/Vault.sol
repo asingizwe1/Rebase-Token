@@ -35,9 +35,9 @@ receive() external payable{}
  * 
  */
 function deposit() external payable
-{
+{uint256 interestRate=i_rebaseToken.getInterestRate();
   // IrebaseToken( i_rebaseToken) we can do this but its a better practice of putting it in constructor
-   i_rebaseToken.mint(msg.sender,msg.value);
+   i_rebaseToken.mint(msg.sender,msg.value,interestRate);
     emit Deposit(msg.sender,msg.value);
 }
 

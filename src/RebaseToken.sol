@@ -76,10 +76,10 @@ if (_newInterestRate>s_interestRate){
  * @param _amount the amount of tokens to mint
  * 
  */
-function mint(address _to, uint256 _amount) external onlyRole(MINT_AND_BURN_ROLE)
+function mint(address _to, uint256 _amount, uint256 _userInterestRate) external onlyRole(MINT_AND_BURN_ROLE)
 {
     // at point of minting we want to set our own interest rate
-s_userInterestRate[_to]=s_interestRate;
+s_userInterestRate[_to]=_userInterestRate;//we need the one from the user not hardcoded into contract
 _mint(_to,_amount);//from openzeppelin
 //if someone has minted before, interest is done before acrued interest
 _mintAccruedInterest(_to);//mint any interest that has accrued simnce last
