@@ -1,8 +1,12 @@
 [profile.default]
-src = "src"
+remappings = ["@openzeppelin/=lib/openzeppelin-contracts/"
+"@ccip/contracts/=lib/chainlink-ccip/chains/contracts/",
+"openzeppelin/contracts@5.0.2/=lib/openzeppelin-contracts-5.0.2/contracts/"
+"openzeppelin/contracts@4.0.3/=lib/openzeppelin-contracts-4.0.3/contracts/"
+
+]src = "src"
 out = "out"
 libs = ["lib"]
-remappings = ["@openzeppelin/=lib/openzeppelin-contracts/"]
 
 
 # See more config options https://github.com/foundry-rs/foundry/blob/master/crates/config/README.md#all-options
