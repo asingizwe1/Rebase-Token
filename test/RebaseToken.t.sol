@@ -147,7 +147,7 @@ function testCannotCallMintAndBurn() public
 vm.prank(user);
 //expectPartialRevert is a cheatcode used in testing smart contracts. Its purpose is to let you assert that a transaction reverts with a specific error selector (the first 4 bytes of the revert data), without requiring you to match the entire revert payload.
 vm.expectPartialRevert(bytes4(AccessControl.AccessControlUnauthorized.selector));
-rebaseToken.mint(user,100);
+rebaseToken.mint(user,100,rebaseToken.getInterestRate());
 vm.expectRevert();
 rebaseToken.burn(user,100);
 
@@ -172,3 +172,5 @@ assertEq(address(vault.getRebaseToken()),address(rebaseToken));
 }
 
 }
+//test contracts as if they have been deployed on our chains
+//you use createSelectFork

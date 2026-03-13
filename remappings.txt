@@ -1,2 +1,3 @@
 @openzeppelin/=lib/openzeppelib-contracts/
 @ccip/=lib/ccip/
+@chainlink-local/=lib/chainlink-local/
