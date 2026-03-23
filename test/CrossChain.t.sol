@@ -51,8 +51,9 @@ vault= new Vault(IRebaseToken(address(sepoliaToken)));//users should be able to 
 //we shall only have it on sepolia because we want users to deploy everything on source chain
 sepoliaPool=new RebaseTokenPool(IERC20(address(sepoliaToken)),new address[](0), sepoliaNetworkDetails.rmnProxy );
 //we have to put constructor arguments.. ir rmnProxy but from CCIPLocal simulator
-//we allow pool and vault to burn and mint by calling the burn
-
+//we allow pool and vault to burn and mint by calling the burnandmint function
+sepoliaToken.grantMintAndBurnRole(address(vault));
+sepoliaToken.grantMintAndBurnRole(address(sepoliaPool));
 vm.stopPrank();
 
 //deploy and configure on ArbSepolia
@@ -61,6 +62,8 @@ arbSepoliaNetworkDetails=ccipLocalSimulatorFork.getNetworkDetails(block.chainid)
 arbSepoliaToken=new RebaseToken();
 //below we are deploying the pool on both sepolia and arbSepolia
 arbSepoliaPool=new RebaseTokenPool(IERC20(address(sepoliaToken)),new address[](0), sepoliaNetworkDetails.rmnProxy );
+//we also grant mint and burn function for the pool
+sepoliaToken.grantMintAndBurnRole(address(arbSepoliaPool));
 vm.startPrank(owner);
 vm.stopPrank();
 
