@@ -9,6 +9,8 @@ import {RebaseTokenPool} from "../src/RebaseTokenPool.sol";
 import {Vault} from "../src/Vault.sol";
 import {IRebaseToken} from "..src/interfaces/IRebaseToken.sol";
 import {CCIPLocalSimulatorFork,Register} from "@chainlink-local/src/ccip/CCIPLocalSimulatorFork.sol";
+import {registryModuleOwnerCustomAddress} from "@ccip/contracts/src/v0.8/ccip/tokenAdminRegistry/RegistrymoduleOwnerCustom.sol";
+import {TokenAdminRegistry} from "@ccip/contracts/tokenAdminRegistry/TokenAdminRegistry.sol";
 
 contract CrossChainTest is Test{
     address constant owner=makeAddr("owner");
@@ -54,6 +56,10 @@ sepoliaPool=new RebaseTokenPool(IERC20(address(sepoliaToken)),new address[](0), 
 //we allow pool and vault to burn and mint by calling the burnandmint function
 sepoliaToken.grantMintAndBurnRole(address(vault));
 sepoliaToken.grantMintAndBurnRole(address(sepoliaPool));
+RegistryOwnerModuleCustom(sepoliaNetworkdetails.registryModuleOwnerCustomAddress).registerAdminViaOwner();
+TokenAdminRegistry(sepoliaNetworkDetails.tokenAdminRegistryAddress).acceptAdminRole(address(sepoliaToken));
+TokenAdminRegistry(sepoliaNetworkDetails.tokenAdminRegistryAddress).setPool(address(sepoliaToken),address(sepoliaPool))
+
 vm.stopPrank();
 
 //deploy and configure on ArbSepolia
@@ -64,6 +70,9 @@ arbSepoliaToken=new RebaseToken();
 arbSepoliaPool=new RebaseTokenPool(IERC20(address(sepoliaToken)),new address[](0), sepoliaNetworkDetails.rmnProxy );
 //we also grant mint and burn function for the pool
 sepoliaToken.grantMintAndBurnRole(address(arbSepoliaPool));
+RegistryOwnerModuleCustom(arbSepoliaNetworkdetails.registryModuleOwnerCustomAddress).registerAdminViaOwner(adddress(arbSepoliaToken));//intermediate casting
+TokenAdminRegistry(sepoliaNetworkDetails.tokenAdminRegistryAddress).acceptAdminRole(address(arbSepoliaToken));
+TokenAdminRegistry(sepoliaNetworkDetails.tokenAdminRegistryAddress).setPool(address(arbSepoliaToken),address(arbSepoliaPool));
 vm.startPrank(owner);
 vm.stopPrank();
 
