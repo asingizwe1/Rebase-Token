@@ -6,7 +6,7 @@ import {IRebaseToken} from "./interfaces/IRebaseToken.sol";
 //token pool contract helps to make token crosschain
 contract RebaseTokenPool is TokenPool
 {
-constructor(IERC20 _token, address[] memory _allowlist, address _rmProxy, address _router) TokenPool(_token, 18,_allowlist,_rmProxy,_router)
+constructor(IERC20 _token, address[] memory _allowlist, address _rmnProxy, address _router) TokenPool(_token, 18,_allowlist,_rmnProxy,_router)
 {
 
 }

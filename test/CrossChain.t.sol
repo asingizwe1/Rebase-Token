@@ -1,13 +1,14 @@
 //SPDX-License-Identifier:MIT
 pragma solidity ^0.8.24;
 
+import {IERC20} from ""; //from the ccip one not openzeppelin one due to the parameters taken up
+
 import {Test,console} from "forge-std/test.sol";
 import {RebaseToken} from "../src/RebaseToken.sol";
 import {RebaseTokenPool} from "../src/RebaseTokenPool.sol";
 import {Vault} from "../src/Vault.sol";
-
 import {IRebaseToken} from "..src/interfaces/IRebaseToken.sol";
-import {CCIPLocalSimulatorFork} from "@chainlink-local/src/ccip/CCIPLocalSimulatorFork.sol";
+import {CCIPLocalSimulatorFork,Register} from "@chainlink-local/src/ccip/CCIPLocalSimulatorFork.sol";
 
 contract CrossChainTest is Test{
     address constant owner=makeAddr("owner");
@@ -15,12 +16,22 @@ uint256 sepoliaFork;
 uint256 arbSepoliaFork;
 
 CCIPLocalSimulatorFork ccipLocalSimulatorFork;
-
+//we must first store contracts in storage when we want to deploy them
 RebaseToken sepoliaToken;
 RebaseToken arbSepoliaToken;
 
+//we add the token pools wheich we want to deploy to the storage
+RebaseTokenPool sepoliaPool;
+
+RebaseTokenPool arbSepoliaPool;
+
+//type value
+Register.NetworkDetails sepoliaNetworkDetails;
+Register.NetworkDetails arbSepoliaNetworkDetails;
+
+
 //deploying the vault
-Vault vault;
+Vault vault;// we store it in storage wehn we want to deploy it
 function setUp() public
 {
 //we shall use our forked objects alot of the time
@@ -31,15 +42,25 @@ ccipLocalSimulatorFork=new CCIPLocalSimulatorFork();
 vm.makePersistent(address(ccipLocalSimulator));
 
 //deploy and configure on sepolia
-vm.startPrank(owner);
+sepoliaNetworkDetails=ccipLocalSimulatorFork.getNetworkDetails(block.chainid);
+vm.startPrank(owner);//becuase we shall pass in alot
 //we deploy new token to chain
 sepoliaToken=new RebaseToken();
-vault= new Vault(IRebaseToken(sepoliaToken));//users should be able to deposit to source chain
+//we do intermediate casting to that address
+vault= new Vault(IRebaseToken(address(sepoliaToken)));//users should be able to deposit to source chain
+//we shall only have it on sepolia because we want users to deploy everything on source chain
+sepoliaPool=new RebaseTokenPool(IERC20(address(sepoliaToken)),new address[](0), sepoliaNetworkDetails.rmnProxy );
+//we have to put constructor arguments.. ir rmnProxy but from CCIPLocal simulator
+//we allow pool and vault to burn and mint by calling the burn
+
 vm.stopPrank();
 
 //deploy and configure on ArbSepolia
-vm.selectFork(arbSepoliaFork);
+vm.selectFork(arbSepoliaFork);//we use select fork to ensure everything is interacting on arbitrum sepolia
+arbSepoliaNetworkDetails=ccipLocalSimulatorFork.getNetworkDetails(block.chainid);
 arbSepoliaToken=new RebaseToken();
+//below we are deploying the pool on both sepolia and arbSepolia
+arbSepoliaPool=new RebaseTokenPool(IERC20(address(sepoliaToken)),new address[](0), sepoliaNetworkDetails.rmnProxy );
 vm.startPrank(owner);
 vm.stopPrank();
 
