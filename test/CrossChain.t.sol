@@ -82,7 +82,20 @@ vm.stopPrank();
 //create a way to simulate crosschain transactions
 //chainlink cross chain local helps to achieve this
 
+// set it in a way that we can configure pool for sepolia or arbitrum
+//local - we are talking about
 
+// if you are working with arbitrum
+// local-arbitrum
+// remote- sepolia
+function configureTokenPool() public
+ {
+
+
+ }
 }
 
 //to configure token pool we apply chain updates
+//enabling a token emeans you are allowing chain to receive tokens from the chain you are working on
+// you do that by adding chain to chainupdates array
+//we apply chain updates onto our token pools
