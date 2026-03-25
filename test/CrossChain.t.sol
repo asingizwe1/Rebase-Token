@@ -5,6 +5,8 @@ pragma solidity ^0.8.24;
 
 import {IERC20} from ""; //from the ccip one not openzeppelin one due to the parameters taken up
 
+import {TokenPool} from "@ccipcontracts/pools/TokenPool.sol";
+
 import {Test,console} from "forge-std/test.sol";
 import {RebaseToken} from "../src/RebaseToken.sol";
 import {RebaseTokenPool} from "../src/RebaseTokenPool.sol";
@@ -88,10 +90,30 @@ vm.stopPrank();
 // if you are working with arbitrum
 // local-arbitrum
 // remote- sepolia
-function configureTokenPool() public
+function configureTokenPool(uint256 fork, address localPool
+//chain selector for the chain to enable
+uint64 remoteChainSelector
+) public
  {
+vm.selectFor(fork);
+vm.prank(owner);// because we are going to prank one function
+TokenPool.ChainUpdate[] memory chainsToAdd =new TokenPool.ChainUpdate[](1) ;
+
+// struct ChainUpdate
+// {
+// uint64 remoteChainSelector;
+// bytes[] remotePoolAddresses;
+// bytes remoteTokenAddresses;
+// RateLimiter.Config outboundRateLimiterConfig;
+// RateLimiter.Config inboundRateLimiterConfig;
+// }
+
+chainsToAdd[0]=TokenPool.ChainUpdate({
 
 
+}) ;
+TokenPool(localPool).applyChainUpdates(new uint64[](0),chainToAdd);//first is array of chains we want to be moving
+//to call applyChainUpdates we cast local pool as tokenpool
  }
 }
 
