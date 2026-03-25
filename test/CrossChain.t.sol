@@ -1,6 +1,8 @@
 //SPDX-License-Identifier:MIT
 pragma solidity ^0.8.24;
 
+//CHAINLINK CCIP documentation ....
+
 import {IERC20} from ""; //from the ccip one not openzeppelin one due to the parameters taken up
 
 import {Test,console} from "forge-std/test.sol";
@@ -82,3 +84,5 @@ vm.stopPrank();
 
 
 }
+
+//to configure token pool we apply chain updates
