@@ -92,12 +92,16 @@ vm.stopPrank();
 // remote- sepolia
 function configureTokenPool(uint256 fork, address localPool
 //chain selector for the chain to enable
-uint64 remoteChainSelector
+uint64 remoteChainSelector,address remotePool, address remoteTokenAddress
 ) public
  {
 vm.selectFor(fork);
 vm.prank(owner);// because we are going to prank one function
+
+bytes[] memory remotePoolAddresses= new bytes[](1);
+remotePoolAddresses[0] = abi.encode(remotePool);
 TokenPool.ChainUpdate[] memory chainsToAdd =new TokenPool.ChainUpdate[](1) ;
+
 
 // struct ChainUpdate
 // {
@@ -108,9 +112,12 @@ TokenPool.ChainUpdate[] memory chainsToAdd =new TokenPool.ChainUpdate[](1) ;
 // RateLimiter.Config inboundRateLimiterConfig;
 // }
 
+//since its a bytes[] we need to abiEncode
+
 chainsToAdd[0]=TokenPool.ChainUpdate({
-
-
+remoteChainSelector: remoteChainSelector,
+remotePoolAddresses: remotePoolAddresses,
+remoteTokenAddresses: abi.encode(remoteTokenAddress),
 }) ;
 TokenPool(localPool).applyChainUpdates(new uint64[](0),chainToAdd);//first is array of chains we want to be moving
 //to call applyChainUpdates we cast local pool as tokenpool
