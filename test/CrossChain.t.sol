@@ -15,7 +15,7 @@ import {IRebaseToken} from "..src/interfaces/IRebaseToken.sol";
 import {CCIPLocalSimulatorFork,Register} from "@chainlink-local/src/ccip/CCIPLocalSimulatorFork.sol";
 import {registryModuleOwnerCustomAddress} from "@ccip/contracts/src/v0.8/ccip/tokenAdminRegistry/RegistrymoduleOwnerCustom.sol";
 import {TokenAdminRegistry} from "@ccip/contracts/tokenAdminRegistry/TokenAdminRegistry.sol";
-
+import {Client} from "@ccip/contracts/libraries/Client.sol";
 contract CrossChainTest is Test{
     address constant owner=makeAddr("owner");
 uint256 sepoliaFork;
@@ -131,7 +131,22 @@ TokenPool(localPool).applyChainUpdates(new uint64[](0),chainToAdd);//first is ar
  }
 
 //we are going to do this in that we can send tokens from sepolia to arb and vice versa
-function bridgeTokens() public{}
+function bridgeTokens(uint256 amountToBridge, uint256 localFork, uint256 remoteFork, Register.NetworkDetails memory localNetworkDetails,Register.NetworkDetails  memory remoteNetworkDetails,RebaseToken localToken, RebaseToken remoteToken) public
+{///we first select fork we are working on
+vm.selectFork(localFork);//since we are working on local fork first
+// we set up the message to send
+Client.EVM2AnyMessage memory message=Client.EVM2AnyMessage({
+
+receiver: abi.encode(remoteToken),// we are sending to the remote token contract
+
+
+})
+
+
+vm.startPrank(owner);
+
+
+}
 
 }
 
