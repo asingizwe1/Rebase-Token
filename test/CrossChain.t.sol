@@ -77,7 +77,12 @@ sepoliaToken.grantMintAndBurnRole(address(arbSepoliaPool));
 RegistryOwnerModuleCustom(arbSepoliaNetworkdetails.registryModuleOwnerCustomAddress).registerAdminViaOwner(adddress(arbSepoliaToken));//intermediate casting
 TokenAdminRegistry(sepoliaNetworkDetails.tokenAdminRegistryAddress).acceptAdminRole(address(arbSepoliaToken));
 TokenAdminRegistry(sepoliaNetworkDetails.tokenAdminRegistryAddress).setPool(address(arbSepoliaToken),address(arbSepoliaPool));
-vm.startPrank(owner);
+
+//CONFIGURING OUR POOLS TO KNOW ABOUT EACH OTHER
+//the tokens are of type rebase token pool thats why we cast them as addresses
+configureTokenPool(sepoliaFork,address(sepoliaPool),arbSepoliaNetworkDetails.chainSelector,address(arbSepoliaPool),address(arbSepoliaToken));
+configureTokenPool(arbSepoliaFork,address(arbSepoliaPool),sepoliaNetworkDetails.chainSelector,address(sepoliaPool),address(sepoliaToken));
+//we do the above because we want to be able to send tokens from sepolia to arbitrum and vice versa
 vm.stopPrank();
 
 }
@@ -95,7 +100,7 @@ function configureTokenPool(uint256 fork, address localPool
 uint64 remoteChainSelector,address remotePool, address remoteTokenAddress
 ) public
  {
-vm.selectFor(fork);
+vm.selectFork(fork);
 vm.prank(owner);// because we are going to prank one function
 
 bytes[] memory remotePoolAddresses= new bytes[](1);
@@ -118,13 +123,21 @@ chainsToAdd[0]=TokenPool.ChainUpdate({
 remoteChainSelector: remoteChainSelector,
 remotePoolAddresses: remotePoolAddresses,
 remoteTokenAddresses: abi.encode(remoteTokenAddress),
+outboundRateLimiterConfig: RateLimiter.Config(isEnabled:false,capacity:0,rate:0),// we are not setting up rate limiter in this example so we set it to 0
 }) ;
+inboundRateLimiterConfig: RateLimiter.Config(isEnabled:false,capacity:0,rate:0)//because we arent allowing rate limiting
 TokenPool(localPool).applyChainUpdates(new uint64[](0),chainToAdd);//first is array of chains we want to be moving
 //to call applyChainUpdates we cast local pool as tokenpool
  }
+
+//we are going to do this in that we can send tokens from sepolia to arb and vice versa
+function bridgeTokens() public{}
+
 }
 
 //to configure token pool we apply chain updates
 //enabling a token emeans you are allowing chain to receive tokens from the chain you are working on
 // you do that by adding chain to chainupdates array
 //we apply chain updates onto our token pools
+
+
