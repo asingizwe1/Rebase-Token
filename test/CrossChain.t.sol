@@ -130,20 +130,33 @@ TokenPool(localPool).applyChainUpdates(new uint64[](0),chainToAdd);//first is ar
 //to call applyChainUpdates we cast local pool as tokenpool
  }
 
+
+
+
+//Register.NetworkDetails  - struct defined somewhere in your Register contract or library. It likely contains metadata about a blockchain network. Typical fields might include:
 //we are going to do this in that we can send tokens from sepolia to arb and vice versa
 function bridgeTokens(uint256 amountToBridge, uint256 localFork, uint256 remoteFork, Register.NetworkDetails memory localNetworkDetails,Register.NetworkDetails  memory remoteNetworkDetails,RebaseToken localToken, RebaseToken remoteToken) public
 {///we first select fork we are working on
 vm.selectFork(localFork);//since we are working on local fork first
 // we set up the message to send
+Client.EVMTokenAmount[] memory tokenAmounts=new Client.EVMTokenAmount[](1); 
+tokenAmounts[0]=Client.EVMTokenAmount({
+//we create an array of 1 since we are only sending one token, if we wanted to send multiple tokens we would increase the size of the array and add more token amounts
+token:address(localToken),//we cast it to an address because its of type rebase token
+
+})
+//before the fees we create the message to send to the remote chain 
 Client.EVM2AnyMessage memory message=Client.EVM2AnyMessage({
 
 receiver: abi.encode(remoteToken),// we are sending to the remote token contract
-
-
+data:"",
+tokenAmounts:tokenAmounts;//we pass this to the token struct
+feeToken:localNetworkDetails.linkAddress,// we pay fees in the native token of the local chain;
 })
 
 
-vm.startPrank(owner);
+vm.startPrank(owner)//the user going to be initiating those transfers
+
 
 
 }
