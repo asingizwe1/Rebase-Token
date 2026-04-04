@@ -6,7 +6,7 @@ pragma solidity ^0.8.24;
 import {IERC20} from ""; //from the ccip one not openzeppelin one due to the parameters taken up
 
 import {TokenPool} from "@ccipcontracts/pools/TokenPool.sol";
-
+import {IRouterClient} from "@ccip/contracts/interfaces/IRouterClient.sol";
 import {Test,console} from "forge-std/test.sol";
 import {RebaseToken} from "../src/RebaseToken.sol";
 import {RebaseTokenPool} from "../src/RebaseTokenPool.sol";
@@ -138,6 +138,8 @@ TokenPool(localPool).applyChainUpdates(new uint64[](0),chainToAdd);//first is ar
 function bridgeTokens(uint256 amountToBridge, uint256 localFork, uint256 remoteFork, Register.NetworkDetails memory localNetworkDetails,Register.NetworkDetails  memory remoteNetworkDetails,RebaseToken localToken, RebaseToken remoteToken) public
 {///we first select fork we are working on
 vm.selectFork(localFork);//since we are working on local fork first
+vm.startPrank(owner)//the user going to be initiating those transfers
+
 // we set up the message to send
 Client.EVMTokenAmount[] memory tokenAmounts=new Client.EVMTokenAmount[](1); 
 tokenAmounts[0]=Client.EVMTokenAmount({
@@ -152,11 +154,18 @@ receiver: abi.encode(remoteToken),// we are sending to the remote token contract
 data:"",
 tokenAmounts:tokenAmounts;//we pass this to the token struct
 feeToken:localNetworkDetails.linkAddress,// we pay fees in the native token of the local chain;
-})
+extraArgs: Client._argsToBytes(Client.EVMExtraArgsV1({gaslimit:0//we dont want a custom gas limit
+}))//from client library
 
 
-vm.startPrank(owner)//the user going to be initiating those transfers
+});
+//we call the router contract to pass the fees
+// we cast it to an interface that has the available functions in the router contract
+uint256 fee= IRouterClient(localnetworkDetails.routerAddress).getFee(remoteNetworkDetails.chainSelector,message);//calling router contract
+//approve router contract for a fee
 
+
+vm.stopPrank();
 
 
 }
