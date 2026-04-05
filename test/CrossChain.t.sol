@@ -180,7 +180,7 @@ uint256 localBalanceAfter=localToken.balanceOf(user);
 //we are casting it to IRouter so that we can access ccipSend
 //vm.stopPrank(); - we cant use vm.stop/start prank - because we need to ensire that our prank has ended else our pranks are gonna mess up
 //we want to wait for the message to be received on the remote chain before we check the balance there, we can use vm.warp or vm.roll to simulate the passage of time and blocks
-
+uint256 localUserInterestRate=localToken.getUserInterestRate(user);
 //If you wrap everything in a long vm.startPrank(user) block, then every single call (including your local fee simulation) runs as user. That can cause mismatches or unintended behavior, because the simulation function may expect to be called from the test contract (address(this)), not the impersonated use
 assertEq(localBalanceBefore - localBalanceAfter, amountToBridge + fee, "Local balance should decrease by the bridged amount plus fees") ;
 vm.selectFork(remoteFork);
@@ -189,6 +189,11 @@ vm.warp(block.timestamp + 20 minutes);//to ensure nothing funcky happens with th
 uint256 remoteBalance=remoteToken.balanceOf(user); //inital balance of remote chain
 //balance on remote chain after the message is received
 ccipLocalSimulatorFork.switchChainAndRouteMessage(remoteFork);// we call the function to receive the message on the remote chain
+uint256 remoteBalanceAfter=remoteToken.balanceOf(user);
+assertEq(remoteBalanceAfter - remoteBalance+amountToBridge);
+//assert interst rate is equal to interest rate on source chain
+uint256 remoteUserInterestRate=remoteToken.getUserInterestRate(user);
+assertEq(localUserInterestRate,remoteUserInterestRate,"Interest rates should be the same on both chains after bridging");
 
 }
 
