@@ -138,8 +138,9 @@ TokenPool(localPool).applyChainUpdates(new uint64[](0),chainToAdd);//first is ar
 function bridgeTokens(uint256 amountToBridge, uint256 localFork, uint256 remoteFork, Register.NetworkDetails memory localNetworkDetails,Register.NetworkDetails  memory remoteNetworkDetails,RebaseToken localToken, RebaseToken remoteToken) public
 {///we first select fork we are working on
 vm.selectFork(localFork);//since we are working on local fork first
-vm.startPrank(owner)//the user going to be initiating those transfers
-
+//vm.startPrank(owner)//the user going to be initiating those transfers
+//Tells the Foundry VM: “From now on, treat all calls as if they’re coming from this address.”
+//Every external call you make after this will have msg.sender = address
 // we set up the message to send
 Client.EVMTokenAmount[] memory tokenAmounts=new Client.EVMTokenAmount[](1); 
 tokenAmounts[0]=Client.EVMTokenAmount({
@@ -159,15 +160,28 @@ extraArgs: Client._argsToBytes(Client.EVMExtraArgsV1({gaslimit:0//we dont want a
 
 
 });
+
 //we call the router contract to pass the fees
 // we cast it to an interface that has the available functions in the router contract
 uint256 fee= IRouterClient(localnetworkDetails.routerAddress).getFee(remoteNetworkDetails.chainSelector,message);//calling router contract
+vm.prank(user);
 //approve router contract for a fee
+IERC20(localNetworkDetails.linkAddress).approve(localNetworkDetails.routerAddress,fee);
+//we pretend like we have some link
+ccipLocalSimulatorFork.requestLinkFromFaucet(user,fee);
 
+vm.prank(user);//WE USE LINE PRANK BECAUSE 
+IERC20(localToken).approve(localNetworkDetails.routerAddress,amountToBridge);//the router address can spend local tokens/router is allowed to spend amount to bridge
+//WE WANTTO GET LOCAL CHAIN BALANCE BEFORE WE SEND CROSS CHAIN MESSAGE
+uint256 localBalanceBefore=localToken.balanceOf(user);
+vm.prank(user);
+IRouterClient(localNetworkDetails.routerAddress).ccipSend(remoteNetworkDetails.chainSelector,message);// we call ccip send to send the message to the remote chain
+uint256 localBalanceAfter=localToken.balanceOf(user);
+//we are casting it to IRouter so that we can access ccipSend
+//vm.stopPrank(); - we cant use vm.stop/start prank - because we need to ensire that our prank has ended else our pranks are gonna mess up
+//we want to wait for the message to be received on the remote chain before we check the balance there, we can use vm.warp or vm.roll to simulate the passage of time and blocks
 
-vm.stopPrank();
-
-
+//If you wrap everything in a long vm.startPrank(user) block, then every single call (including your local fee simulation) runs as user. That can cause mismatches or unintended behavior, because the simulation function may expect to be called from the test contract (address(this)), not the impersonated use
 }
 
 }
@@ -177,4 +191,4 @@ vm.stopPrank();
 // you do that by adding chain to chainupdates array
 //we apply chain updates onto our token pools
 
-
+// 12:34 / 21:10
