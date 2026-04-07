@@ -194,8 +194,17 @@ assertEq(remoteBalanceAfter - remoteBalance+amountToBridge);
 //assert interst rate is equal to interest rate on source chain
 uint256 remoteUserInterestRate=remoteToken.getUserInterestRate(user);
 assertEq(localUserInterestRate,remoteUserInterestRate,"Interest rates should be the same on both chains after bridging");
+//--via-ir/intermediate first by doing some yul operations first -> when you have many variables you compile using it to avoid teh stack too deeep error
+}
+//a test to bridge tokens
+function testBridgeAllTokens() public{///no fuzz tests because it already takes long to run
+vm.selectFork(sepoliaFork);
+vm.deal(user,SEND_VALUE);
 
 }
+
+
+
 
 }
 
