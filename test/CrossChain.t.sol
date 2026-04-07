@@ -20,7 +20,9 @@ contract CrossChainTest is Test{
     address constant owner=makeAddr("owner");
 uint256 sepoliaFork;
 uint256 arbSepoliaFork;
-
+uint256 SEND_VALUE=1e5;// we use this value to fund our user with link to pay for fees and also to have some tokens to bridge
+address user=makeAddr("user");
+address owner=makeAddr("owner");
 CCIPLocalSimulatorFork ccipLocalSimulatorFork;
 //we must first store contracts in storage when we want to deploy them
 RebaseToken sepoliaToken;
@@ -200,7 +202,14 @@ assertEq(localUserInterestRate,remoteUserInterestRate,"Interest rates should be 
 function testBridgeAllTokens() public{///no fuzz tests because it already takes long to run
 vm.selectFork(sepoliaFork);
 vm.deal(user,SEND_VALUE);
-
+vm.prank(user);
+//we cast the vault to ensure its payable and we can send eth to it, we also need to have some tokens to bridge so we deposit to the vault
+//we also pass it to vault contract so that we can call the deposit contract on it
+Vault(payable(address(vault))).deposit{value:SEND_VALUE}(address(sepoliaToken),SEND_VALUE);//we deposit to the vault so that we have some tokens to bridge
+//balance of the user should be equal to the send value
+assertEq(sepoliaToken.balanceOf(user),SEND_VALUE,"User should have the deposited tokens in their balance");
+//we call the function to bridge tokens
+bridgeTokens(SEND_VALUE,sepoliaFork,arbSepoliaFork,sepoliaNetworkDetails,arbSepoliaNetworkDetails,sepoliaToken,arbSepoliaToken);
 }
 
 
