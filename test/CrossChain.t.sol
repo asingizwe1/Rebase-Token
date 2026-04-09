@@ -222,4 +222,4 @@ bridgeTokens(SEND_VALUE,sepoliaFork,arbSepoliaFork,sepoliaNetworkDetails,arbSepo
 // you do that by adding chain to chainupdates array
 //we apply chain updates onto our token pools
 
-// 12:34 / 21:10
+// 5:56
