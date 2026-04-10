@@ -18,12 +18,12 @@ import {TokenAdminRegistry} from "@ccip/contracts/tokenAdminRegistry/TokenAdminR
 import {Client} from "@ccip/contracts/libraries/Client.sol";
 contract CrossChainTest is Test{
     address constant owner=makeAddr("owner");
-uint256 sepoliaFork;
+uint256 sepoliaFork;//we created our forks
 uint256 arbSepoliaFork;
 uint256 SEND_VALUE=1e5;// we use this value to fund our user with link to pay for fees and also to have some tokens to bridge
 address user=makeAddr("user");
 address owner=makeAddr("owner");
-CCIPLocalSimulatorFork ccipLocalSimulatorFork;
+CCIPLocalSimulatorFork ccipLocalSimulatorFork;//we created our local ccip local instance
 //we must first store contracts in storage when we want to deploy them
 RebaseToken sepoliaToken;
 RebaseToken arbSepoliaToken;
@@ -62,12 +62,15 @@ sepoliaPool=new RebaseTokenPool(IERC20(address(sepoliaToken)),new address[](0), 
 //we allow pool and vault to burn and mint by calling the burnandmint function
 sepoliaToken.grantMintAndBurnRole(address(vault));
 sepoliaToken.grantMintAndBurnRole(address(sepoliaPool));
+//we registered ccip admin to the owner
 RegistryOwnerModuleCustom(sepoliaNetworkdetails.registryModuleOwnerCustomAddress).registerAdminViaOwner();
+//we have accepted the admin role for the token and set the pool for the token in the registry
 TokenAdminRegistry(sepoliaNetworkDetails.tokenAdminRegistryAddress).acceptAdminRole(address(sepoliaToken));
 TokenAdminRegistry(sepoliaNetworkDetails.tokenAdminRegistryAddress).setPool(address(sepoliaToken),address(sepoliaPool))
 
+//what we did for sepolia including seting admin roles and setting details is done for arbitrum
 vm.stopPrank();
-
+//we got network details on both sepolia and arbitrum so that we can deploy our pools
 //deploy and configure on ArbSepolia
 vm.selectFork(arbSepoliaFork);//we use select fork to ensure everything is interacting on arbitrum sepolia
 arbSepoliaNetworkDetails=ccipLocalSimulatorFork.getNetworkDetails(block.chainid);
@@ -82,6 +85,8 @@ TokenAdminRegistry(sepoliaNetworkDetails.tokenAdminRegistryAddress).setPool(addr
 
 //CONFIGURING OUR POOLS TO KNOW ABOUT EACH OTHER
 //the tokens are of type rebase token pool thats why we cast them as addresses
+//we configure token pool so that we are able to receive and send tokens to sepolia and vice versa
+//we did that buy creating the CHAINUPDATE STRUCT which we passed to applyCHainUpdtaes
 configureTokenPool(sepoliaFork,address(sepoliaPool),arbSepoliaNetworkDetails.chainSelector,address(arbSepoliaPool),address(arbSepoliaToken));
 configureTokenPool(arbSepoliaFork,address(arbSepoliaPool),sepoliaNetworkDetails.chainSelector,address(sepoliaPool),address(sepoliaToken));
 //we do the above because we want to be able to send tokens from sepolia to arbitrum and vice versa
@@ -128,6 +133,7 @@ remoteTokenAddresses: abi.encode(remoteTokenAddress),
 outboundRateLimiterConfig: RateLimiter.Config(isEnabled:false,capacity:0,rate:0),// we are not setting up rate limiter in this example so we set it to 0
 }) ;
 inboundRateLimiterConfig: RateLimiter.Config(isEnabled:false,capacity:0,rate:0)//because we arent allowing rate limiting
+//If you want to remove a chain then you populate the  uint64[] array with chain selsector
 TokenPool(localPool).applyChainUpdates(new uint64[](0),chainToAdd);//first is array of chains we want to be moving
 //to call applyChainUpdates we cast local pool as tokenpool
  }
@@ -144,12 +150,14 @@ vm.selectFork(localFork);//since we are working on local fork first
 //Tells the Foundry VM: “From now on, treat all calls as if they’re coming from this address.”
 //Every external call you make after this will have msg.sender = address
 // we set up the message to send
+
 Client.EVMTokenAmount[] memory tokenAmounts=new Client.EVMTokenAmount[](1); 
 tokenAmounts[0]=Client.EVMTokenAmount({
 //we create an array of 1 since we are only sending one token, if we wanted to send multiple tokens we would increase the size of the array and add more token amounts
 token:address(localToken),//we cast it to an address because its of type rebase token
 
 })
+//wehen we want to bridge we create the message struct which we pass to the router contract, we populate the struct with the necessary details such as the receiver address on the remote chain, the data we want to send, the token amounts we want to bridge, the fee token and any extra arguments such as gas limit
 //before the fees we create the message to send to the remote chain 
 Client.EVM2AnyMessage memory message=Client.EVM2AnyMessage({
 
