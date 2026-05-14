@@ -19,7 +19,8 @@ function run() public returns (RebaseToken token, rebaseTokenPool pool) //return
 vm.startBroadcast(); // start sending transactions
 token=new RebaseToken();
 pool = new RebaseTokenPool(IERC20(address(token), new address[](0), networkDetails.rnmProxyAddress,networkDetails.routerAddress) );// the parameters we put are what is in the constructor in the contract
-
+//IERC20(address(token) - //Treat token as something that follows the IERC20 interface.
+//an address alone doesnt have erc20 function
 vm.stopBroadcast();
 }
 }
