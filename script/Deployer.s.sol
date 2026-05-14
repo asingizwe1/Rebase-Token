@@ -6,8 +6,21 @@ import {Script} "forge-std/Script.sol";
 import {IRebaseToken} from "../src/interfaces/IRebaseToken.sol";
 import {Deployer} from "../src/Deployer.sol";
 import {Vault} from "../src/Vault.sol";
-contract TokenAndPoolDeployer{}
+import {RebaseTokenPool} from "../src/RebaseTokenPool.s.sol";
 
+import {RebaseToken} from "../src/RebaseToken.s.sol";
+
+//steps in the ccip documentation /Enable your tokens in CCIP(burn&mint):Register from anEOA using foundry
+contract TokenAndPoolDeployer is Script{
+function run() public returns (RebaseToken token, rebaseTokenPool pool) //returns both our contracts deployed
+{
+vm.startBroadcast(); // start sending transactions
+token=new RebaseToken();
+pool = new RebaseTokenPool();
+
+vm.stopBroadcast();
+}
+}
 //we deploy below seperately  because we only want to deploy the vault on the source chain only
 contract VaultDeployer is Script {
     //takes address of rebase token because we want to pass it in as constructor
