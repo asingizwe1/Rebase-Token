@@ -7,16 +7,16 @@ import {IRebaseToken} from "../src/interfaces/IRebaseToken.sol";
 import {Deployer} from "../src/Deployer.sol";
 import {Vault} from "../src/Vault.sol";
 import {RebaseTokenPool} from "../src/RebaseTokenPool.s.sol";
-
+import {CCIPLocalSimulatorFork} from "@chainlink-local/src/CCIPLocalSimulatorFork.s.sol";
 import {RebaseToken} from "../src/RebaseToken.s.sol";
 
 //steps in the ccip documentation /Enable your tokens in CCIP(burn&mint):Register from anEOA using foundry
 contract TokenAndPoolDeployer is Script{
 function run() public returns (RebaseToken token, rebaseTokenPool pool) //returns both our contracts deployed
-{
+{CCIPLocalSimulatorFork ccipLocalSimulatorFork=new CCIPLocalSimulatorFork(); //create a fork of the local simulator
 vm.startBroadcast(); // start sending transactions
 token=new RebaseToken();
-pool = new RebaseTokenPool();
+pool = new RebaseTokenPool();// the parameters we put are what is in the constructor in the contract
 
 vm.stopBroadcast();
 }
