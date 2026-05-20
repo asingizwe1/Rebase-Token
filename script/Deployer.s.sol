@@ -30,7 +30,7 @@ vm.stopBroadcast();
 }
 }
 //we deploy below seperately  because we only want to deploy the vault on the source chain only
-contract VaultDeployer is Script {
+contract VaultDeployer is Script {//created vault and givem mint and burn role for the vault
     //takes address of rebase token because we want to pass it in as constructor
     function run(address _rebaseToken) external returns (Vault vault)
      {
