@@ -15,17 +15,20 @@ contract ConfigurePool is Script {
             remoteChainSelector: remoteChainSelector,
             remotePoolAddresses: remotePoolAddresses,
             remoteTokenAddress: abi.encode(remoteToken),
-            outboundRateLimiter: RateLimiter.Config({
+            outboundRateLimiterConfig: RateLimiter.Config({
                 isEnabled: outboundRateLimiterIsEnabled,
                 rate: outboundRateLimiterRate,
                 capacity:outboundRateLimiterCapacity
-            })
-               inboundRateLimiter: RateLimiter.Config({
+            }),
+               inboundRateLimiterConfig: RateLimiter.Config({
                 isEnabled: inboundRateLimiterIsEnabled,
                 rate: inboundRateLimiterRate,
                 capacity:inboundRateLimiterCapacity
             }),
         });
+        //we need to create the remote selector array to be able to call the function, otherwise it will revert with "Invalid remote chain selector"
+        //we cast it to token pool so that we are able to access its necessary functions
+        TokenPool(localpool).applyChainUpdates(new  uint64[](0), chainToAdd);
         vm.stopBroadcast();
     }
 }
