@@ -36,7 +36,7 @@ IRC20(tokentOSendAddress).approve(routerAddress, amountToSend);
 IERC20(linkTokenAddress).approve(routerAddress, ccipFee);
 
 //create ccip message, approve the router to spend tokens approve router to spend our fees
-IRouterClient(routerAddress).ccipSend{value: ccipFee}(destinationChainSelector, message);
+IRouterClient(routerAddress).ccipSend(destinationChainSelector, message);
 //that address will depend on which chain we are running the script
 
 vm.stopBroadcast();
