@@ -208,7 +208,7 @@ uint256 remoteUserInterestRate=remoteToken.getUserInterestRate(user);
 assertEq(localUserInterestRate,remoteUserInterestRate,"Interest rates should be the same on both chains after bridging");
 //--via-ir/intermediate first by doing some yul operations first -> when you have many variables you compile using it to avoid teh stack too deeep error
 }
-
+//get rid of the fee variable to cater for the via_ir error
 
 // we create a test which bridges tokens to send tokens cross chain
 //a test to bridge tokens
